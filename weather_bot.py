@@ -95,7 +95,7 @@ def current_weather(bot, update, user_data):
         })
         weather = Weather(response)
         update.message.reply_text(
-            'Погода: {}\nМестоположение: {}\nТемпература: {}°C\nВремя: {}\nСкорость ветра: {}м/c'.format(
+            'Погода: {}\nМестоположение: {}\nТемпература: {}°C\nВремя: {} по Москве\nСкорость ветра: {}м/c'.format(
                 emoji[weather.current_condition['weatherCode']], weather.get_place(),
                 weather.get_temp_in_celsius(), weather.get_time(), weather.wind_speed))
     except:
