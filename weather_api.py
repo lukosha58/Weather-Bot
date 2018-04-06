@@ -1,5 +1,4 @@
 from time import strftime
-import requests
 
 
 class Weather:
@@ -24,3 +23,4 @@ class Weather:
 
     def get_place(self):
         return self.place
+
