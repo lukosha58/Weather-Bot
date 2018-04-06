@@ -1,7 +1,8 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
-import requests
+from telegram import ReplyKeyboardMarkup
 from weather_api import Weather
+from geocoder import geocoder
+import requests, os
 
 SUNNY = '☀'
 PARTLY_CLOUDY = '⛅'
@@ -16,11 +17,11 @@ emoji = {'113': SUNNY, '116': PARTLY_CLOUDY, '119': CLOUDY, '122': OVERCAST, '14
          '263': SNOW, '266': SNOW, '281': SNOW, '284': SNOW, '293': OVERCAST, '296': OVERCAST, '299': OVERCAST,
          '302': OVERCAST,
          '305': OVERCAST * 2, '308': OVERCAST * 3, '311': OVERCAST}
-start_keyboard = [['Текущий день'], ['Прогноз на 5 дней']]
+start_keyboard = [['Текущий день'], ['Прогноз на 5 дней'], ['Новое место']]
 
 
 def start(bot, update):
-    update.message.reply_text('Введите координаты, название города, IP-адресс или ZIP-code.')
+    update.message.reply_text('Введите координаты, название города, IP-адрес или ZIP-code.')
     return 1
 
 
@@ -58,6 +59,8 @@ def choose(bot, update, user_data):
         current_weather(bot, update, user_data)
     elif choice == 'Прогноз на 5 дней':
         forecast_weather(bot, update, user_data)
+    elif choice == 'Новое место':
+        start(bot, update)
     else:
         return 1
 
@@ -93,11 +96,14 @@ def current_weather(bot, update, user_data):
             'format': 'json',
             'tp': '1'
         })
+        geocoder(update, bot, user_data['place'])
         weather = Weather(response)
-        update.message.reply_text(
-            'Погода: {}\nМестоположение: {}\nТемпература: {}°C\nВремя: {} по Москве\nСкорость ветра: {}м/c'.format(
-                emoji[weather.current_condition['weatherCode']], weather.get_place(),
-                weather.get_temp_in_celsius(), weather.get_time(), weather.wind_speed))
+        bot.send_photo(chat_id=update.message.chat.id,
+                       photo=open('map.png', 'rb'),
+                       caption='Погода: {}\nМестоположение: {}\nТемпература: {}°C\nВремя: {} по Москве\nСкорость ветра: {}м/c'.format(
+                                emoji[weather.current_condition['weatherCode']], weather.get_place(),
+                                weather.get_temp_in_celsius(), weather.get_time(), weather.wind_speed))
+        os.remove('map.png')
     except:
         return 1
 
